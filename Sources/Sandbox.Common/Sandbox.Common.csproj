@@ -215,6 +215,7 @@
     <Compile Include="ModAPI\Ingame\IMyReactor.cs" />
     <Compile Include="ModAPI\Ingame\IMyRefinery.cs" />
     <Compile Include="ModAPI\Ingame\IMyReflectorLight.cs" />
+    <Compile Include="ModAPI\Ingame\IMyRemoteBlock.cs" />
     <Compile Include="ModAPI\Ingame\IMyRemoteControl.cs" />
     <Compile Include="ModAPI\Ingame\IMyShipConnector.cs" />
     <Compile Include="ModAPI\Ingame\IMyShipController.cs" />

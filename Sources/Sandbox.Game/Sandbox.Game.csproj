@@ -491,6 +491,7 @@
     <Compile Include="Engine\Voxels\MyVoxelVertex.cs" />
     <Compile Include="Game\Entities\MyPlaceAreas.cs" />
     <Compile Include="Game\Entities\MyPlaceArea.cs" />
+    <Compile Include="Game\Entities\MyRemoteControlWrapper.cs" />
     <Compile Include="Game\Entities\MySolarGameLogicComponent.cs" />
     <Compile Include="Game\Entities\MySpherePlaceArea.cs" />
     <Compile Include="Game\Entities\MyUpgradableBlockComponent.cs" />
