@@ -21,20 +21,23 @@ namespace Sandbox.Game.Entities
         private long m_timeStamp;
         private long m_playerId;
 
-        private bool m_connected = false;
-        bool Connected
+        private bool m_connectedAndOwned = false;
+        bool ConnectedAndOwned
         {
             get
             {
                 var currentTimestamp = Stopwatch.GetTimestamp();
                 var elapsedTime = ((currentTimestamp - m_timeStamp) * Sync.RelativeSimulationRatio) * STOPWATCH_FREQUENCY;
 
-                if (elapsedTime <= 0.75)
-                    return m_connected;
+                if (elapsedTime <= 0.75) //To little time has passed since the last check. Return the same value as last time.
+                    return m_connectedAndOwned;
                 else
                 {
-                    m_connected = ConnectivityTest();
-                    return m_connected;
+                    m_connectedAndOwned = m_block.HasPlayerAccess(m_playerId);
+                    if (m_connectedAndOwned) //If the player owns the block, check for the connection. Otherwise just go ahead with the false.
+                        m_connectedAndOwned = ConnectivityTest();
+
+                    return m_connectedAndOwned;
                 }
             }
         }
@@ -54,39 +57,48 @@ namespace Sandbox.Game.Entities
         }
 
         //Implementation of IMyRemoteBlock
-        string CustomName                       { get { return m_block.CustomName; } }
-        string CustomNameWithFaction            { get { return m_block.CustomNameWithFaction; } }
-        string DetailedInfo                     { get { return m_block.DetailedInfo; } }
-        bool HasLocalPlayerAccess()             { return m_block.HasLocalPlayerAccess(); }
-        bool HasPlayerAccess(long playerId)     { return m_block.HasPlayerAccess(playerId); }
-        void RequestShowOnHUD(bool enable)      { m_block.RequestShowOnHUD(enable); }
-        void SetCustomName(string text)         { m_block.SetCustomName(text); }
-        void SetCustomName(StringBuilder text)  { m_block.SetCustomName(text); }
-        bool ShowOnHUD                          { get { return m_block.ShowOnHUD; } }
+        string CustomName                       { get { if (ConnectedAndOwned) return m_block.CustomName;                   return String.Empty; } }
+        string CustomNameWithFaction            { get { if (ConnectedAndOwned) return m_block.CustomNameWithFaction;        return String.Empty; } }
+        string DetailedInfo                     { get { if (ConnectedAndOwned) return m_block.DetailedInfo;                 return String.Empty; } }
+        bool HasLocalPlayerAccess()             {       if (ConnectedAndOwned) return m_block.HasLocalPlayerAccess();       return false; }
+        bool HasPlayerAccess(long playerId)     {       if (ConnectedAndOwned) return m_block.HasPlayerAccess(playerId);    return false; }
+        void RequestShowOnHUD(bool enable)      {       if (ConnectedAndOwned) m_block.RequestShowOnHUD(enable); }
+        void SetCustomName(string text)         {       if (ConnectedAndOwned) m_block.SetCustomName(text); }
+        void SetCustomName(StringBuilder text)  {       if (ConnectedAndOwned) m_block.SetCustomName(text); }
+        bool ShowOnHUD                          { get { if (ConnectedAndOwned) return m_block.ShowOnHUD;                    return false; } }
 
         void GetActions(List<Sandbox.ModAPI.Interfaces.ITerminalAction> resultList, Func<Sandbox.ModAPI.Interfaces.ITerminalAction, bool> collect = null)
         {
-            m_block.GetActions(resultList, collect);
+            if (ConnectedAndOwned)
+                m_block.GetActions(resultList, collect);
         }
 
         void SearchActionsOfName(string name, List<Sandbox.ModAPI.Interfaces.ITerminalAction> resultList, Func<Sandbox.ModAPI.Interfaces.ITerminalAction, bool> collect = null)
         {
-            m_block.SearchActionsOfName(name, resultList, collect);
+            if (ConnectedAndOwned)
+                m_block.SearchActionsOfName(name, resultList, collect);
         }
 
         Sandbox.ModAPI.Interfaces.ITerminalAction GetActionWithName(string name)
         {
-            return m_block.GetActionWithName(name);
+            if (ConnectedAndOwned)
+                return m_block.GetActionWithName(name);
+            else
+                return null;
         }
 
         Sandbox.ModAPI.Interfaces.ITerminalProperty GetProperty(string id)
         {
-            return GetProperty(id);
+            if (ConnectedAndOwned)
+                return GetProperty(id);
+            else
+                return null;
         }
 
         void GetProperties(List<Sandbox.ModAPI.Interfaces.ITerminalProperty> resultList, Func<Sandbox.ModAPI.Interfaces.ITerminalProperty, bool> collect = null)
         {
-            GetProperties(resultList, collect);
+            if (ConnectedAndOwned)
+                GetProperties(resultList, collect);
         }
     }
 }
